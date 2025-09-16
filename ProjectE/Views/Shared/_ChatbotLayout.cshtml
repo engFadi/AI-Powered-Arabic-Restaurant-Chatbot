@@ -1,0 +1,38 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - Chatbot</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" />
+</head>
+<body>
+    <!-- ✅ Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container-fluid">
+            <!-- البراند -->
+            <a class="navbar-brand" asp-area="" asp-controller="Chatbot" asp-action="Index">
+                🤖 YallaEat.AI
+            </a>
+
+            <!-- ضع زر Logout هنا مباشرة -->
+            <div class="d-flex">
+                <a class="nav-link btn btn-danger text-white px-3"
+                   asp-area="" asp-controller="Auth" asp-action="Logout">
+                    تسجيل خروج
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- ✅ محتوى الصفحة -->
+    <div class="container mt-4">
+        @RenderBody()
+    </div>
+
+    <!-- ✅ Scripts -->
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    @RenderSection("Scripts", required: false)
+</body>
+</html>

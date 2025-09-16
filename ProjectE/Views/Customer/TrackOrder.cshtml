@@ -1,0 +1,249 @@
+﻿@{
+    Layout = "~/Views/Shared/_Layout_Customer.cshtml";
+    ViewData["Title"] = "📦 تتبع طلبي";
+}
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+
+<div class="container mt-5 text-white">
+    <h2 class="text-center mb-4">📦 تتبع طلبك الأخير</h2>
+
+    <div id="orderStatus" class="mt-4 text-center">
+        <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Loading...</span>
+        </div>
+        <p class="text-muted mt-2">جارٍ تحميل بيانات الطلب...</p>
+    </div>
+</div>
+
+<style>
+    body {
+        background-color: #0d1117 !important;
+        direction: rtl;
+        text-align: right;
+    }
+
+    .step {
+        display: inline-block;
+        width: 160px;
+        position: relative;
+        text-align: center;
+        color: white;
+    }
+
+        .step::after {
+            content: '';
+            position: absolute;
+            top: 20px;
+            right: 50%; /* ✅ بدل left */
+            width: 100%;
+            height: 3px;
+            background: #495057;
+            z-index: -1;
+        }
+
+        .step:first-child::after {
+            display: none; /* ✅ خلي أول وحدة يمين بدون خط */
+        }
+
+
+    .circle {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        line-height: 40px;
+        background: #495057;
+        margin: 0 auto;
+        color: white;
+        font-weight: bold;
+    }
+
+    .completed .circle {
+        background: #198754;
+    }
+
+    .active .circle {
+        background: #0d6efd;
+    }
+
+    .cancelled .circle {
+        background: #dc3545;
+    }
+    /* ✅ ADD PRICING STYLES */
+    .pricing-section {
+        background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+        border-radius: 0.75rem;
+        padding: 1.5rem;
+        margin-top: 2rem;
+        border: 1px solid #475569;
+        box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+    }
+
+    .pricing-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 0.75rem;
+        padding: 0.5rem 0;
+        color: #e2e8f0;
+    }
+
+        .pricing-row:not(.total-row) {
+            border-bottom: 1px solid #475569;
+        }
+
+    .total-row {
+        border-top: 2px solid #10b981;
+        padding-top: 1rem;
+        margin-top: 1rem;
+        font-weight: bold;
+        font-size: 1.2rem;
+        color: #10f5a7;
+    }
+
+    .pricing-label {
+        font-weight: 500;
+    }
+
+    .pricing-value {
+        font-weight: 600;
+        font-size: 1.1rem;
+    }
+
+    .free-delivery {
+        color: #10b981;
+        font-weight: bold;
+    }
+</style>
+
+<script>
+    document.addEventListener("DOMContentLoaded", async () => {
+        const token = localStorage.getItem("token");
+        const orderStatusDiv = document.getElementById("orderStatus");
+
+        if (!token) {
+            orderStatusDiv.innerHTML = `<p class='text-danger'>⚠️ الرجاء تسجيل الدخول لعرض الطلبات.</p>`;
+            return;
+        }
+
+        try {
+            const response = await fetch("/api/orders/my/latest", {
+                headers: { "Authorization": "Bearer " + token }
+            });
+
+            if (response.status === 401 || response.status === 403) {
+                orderStatusDiv.innerHTML = `<p class='text-danger'>❌ غير مصرح لك بعرض هذه الصفحة.</p>`;
+                return;
+            }
+
+            if (!response.ok) {
+                orderStatusDiv.innerHTML = `<p class='text-danger'>❌ لا يوجد طلبات.</p>`;
+                return;
+            }
+
+            const order = await response.json();
+
+            // ✅ ترتيب الحالات من اليمين لليسار
+            const steps = ["Pending", "Submitted", "Processing", "OutForDelivery", "Delivered"];
+            const currentStatus = order.status;
+
+            // Progress Tracker
+            let progressHtml = `<h4>الطلب #${order.id}</h4>
+                                <p><strong>الحالة:</strong> ${currentStatus}</p>
+                                <div class="d-flex justify-content-center align-items-center mb-4 flex-row-reverse">`;
+
+
+            steps.forEach((step, index) => {
+                let statusClass = "";
+
+                if (currentStatus === "Cancelled") {
+                    statusClass = "cancelled";
+                } else if (steps.indexOf(currentStatus) > index) {
+                    statusClass = "completed";
+                } else if (steps.indexOf(currentStatus) === index) {
+                    statusClass = "active";
+                }
+
+                progressHtml += `
+                    <div class="step ${statusClass}">
+                        <div class="circle">${index + 1}</div>
+                        <p class="mt-2">${step}</p>
+                    </div>
+                `;
+            });
+
+            progressHtml += `</div>`;
+
+            // Order details
+            let itemsHtml = order.items.map(i =>
+                `<tr>
+                    <td>${i.menuItemName}</td>
+                    <td>${i.notes ?? ""}</td>
+                    <td>${i.quantity}</td>
+                    <td>₪${i.menuItemPrice.toFixed(2)}</td>
+                    <td>₪${(i.quantity * i.menuItemPrice).toFixed(2)}</td>
+                </tr>`
+            ).join("");
+
+            // USE PROPER PRICING FROM API RESPONSE
+            const subtotal = order.subtotal || order.items.reduce((sum, i) => sum + (i.quantity * i.menuItemPrice), 0);
+            const deliveryFee = order.deliveryFee || 0;
+            const totalPrice = order.totalPrice || (subtotal + deliveryFee);
+
+            console.log("Pricing:", { subtotal, deliveryFee, totalPrice }); // Debug log
+
+            progressHtml += `
+                <div class="card shadow-sm bg-dark text-white">
+                    <div class="card-body">
+                        <p><strong>الزبون:</strong> ${order.customerName}</p>
+                        <p><strong>رقم الهاتف:</strong> ${order.phoneNumber}</p>
+                        <p><strong>العنوان:</strong> ${order.deliveryAddress}</p>
+
+                        <hr/>
+                        <h5>الأصناف</h5>
+                        <table class="table table-dark table-striped">
+                            <thead>
+                                <tr>
+                                    <th>الصنف</th>
+                                    <th>ملاحظات</th>
+                                    <th>الكمية</th>
+                                    <th>السعر</th>
+                                    <th>المجموع</th>
+                                </tr>
+                            </thead>
+                            <tbody>${itemsHtml}</tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- ✅ SEPARATE PRICING CARD FOR BETTER VISIBILITY -->
+                <div class="pricing-section">
+                    <h5 class="text-center mb-3" style="color: #f1f5f9;">💰 تفاصيل الفاتورة</h5>
+
+                    <div class="pricing-row">
+                        <span class="pricing-label">المجموع الفرعي:</span>
+                        <span class="pricing-value">₪${subtotal.toFixed(2)}</span>
+                    </div>
+
+                    <div class="pricing-row">
+                        <span class="pricing-label">رسوم التوصيل:</span>
+                        <span class="pricing-value ${deliveryFee === 0 ? 'free-delivery' : ''}">
+                            ${deliveryFee > 0 ? '₪' + deliveryFee.toFixed(2) : 'مجاني'}
+                        </span>
+                    </div>
+
+                    <div class="pricing-row total-row">
+                        <span class="pricing-label">المجموع الإجمالي:</span>
+                        <span class="pricing-value">₪${totalPrice.toFixed(2)}</span>
+                    </div>
+                </div>
+            `;
+
+            orderStatusDiv.innerHTML = progressHtml;
+
+        } catch (err) {
+            orderStatusDiv.innerHTML = `<p class='text-danger'>🚨 خطأ في جلب الطلب.</p>`;
+            console.error(err);
+        }
+    });
+</script>

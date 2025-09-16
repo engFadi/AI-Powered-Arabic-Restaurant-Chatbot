@@ -1,0 +1,66 @@
+﻿@model ProjectE.Models.MenuModels.MenuItem
+
+@{
+    ViewData["Title"] = "Add Menu Item";
+}
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+
+<div class="container py-5">
+    <h2 class="text-center mb-4 text-primary fw-bold">➕ Add New Menu Item</h2>
+
+    <form asp-action="AddMenuItem" method="post" class="p-4 rounded shadow-lg" style="max-width: 600px; margin:auto; background-color: #e6f3ff;">
+
+        <!-- Name -->
+        <div class="form-group mb-3">
+            <label asp-for="Name" class="form-label fw-bold"></label>
+            <input asp-for="Name" class="form-control" placeholder="Enter item name" />
+            <span asp-validation-for="Name" class="text-danger"></span>
+        </div>
+
+        <!-- Category -->
+        <div class="mb-3">
+            <label asp-for="Category" class="form-label fw-bold"></label>
+            <select asp-for="Category" class="form-select border-2">
+                <option value="">-- Select Category --</option>
+                <option value="ساندويش">🥪 ساندويش</option>
+                <option value="سلطة">🥗 سلطة</option>
+                <option value="مشروبات">🥤 مشروبات</option>
+                <option value="وجبات رئيسية">🍽 وجبات رئيسية</option>
+                <option value="مقبلات">🥟 مقبلات</option>
+                <option value="حلويات">🍰 حلويات</option>
+            </select>
+            <span asp-validation-for="Category" class="text-danger small"></span>
+        </div>
+
+        <!-- Price -->
+        <div class="form-group mb-3">
+            <label asp-for="Price" class="form-label fw-bold"></label>
+            <input asp-for="Price" class="form-control" placeholder="Enter price in ₪" />
+            <span asp-validation-for="Price" class="text-danger"></span>
+        </div>
+
+        <!-- Description -->
+        <div class="form-group mb-3">
+            <label asp-for="Description" class="form-label fw-bold"></label>
+            <textarea asp-for="Description" class="form-control" placeholder="Enter item description"></textarea>
+            <span asp-validation-for="Description" class="text-danger"></span>
+        </div>
+
+        <!-- Availability -->
+        <div class="form-check mb-3">
+            <input asp-for="IsAvailable" class="form-check-input" type="checkbox" />
+            <label asp-for="IsAvailable" class="form-check-label fw-bold">Available</label>
+        </div>
+
+        <!-- Submit -->
+        <div class="text-center">
+            <button type="submit" class="btn btn-primary px-4">Add Item</button>
+            <a asp-action="ViewMenu" class="btn btn-secondary px-4 ms-2">Cancel</a>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

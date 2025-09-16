@@ -1,0 +1,154 @@
+﻿<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - YallaEat</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/ProjectE.styles.css" asp-append-version="true" />
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
+
+    <style>
+        .main-header {
+            position: fixed; 
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 50px; 
+            background: linear-gradient(135deg, #198754, #20c997);
+            border-bottom: 3px solid #157347;
+            box-shadow: 0 4px 15px rgba(25, 135, 84, 0.3);
+            padding: 0 1.5rem; 
+            z-index: 1001; 
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 2rem;
+        }
+
+        .header-right-section {
+            display: flex;
+            align-items: center;
+            gap: 20px; 
+        }
+
+        .header-logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .header-icon {
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 50%;
+            width: 45px;
+            height: 45px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 22px;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            color: white;
+            animation: pulse 3s ease-in-out infinite;
+            transition: all 0.6s ease;
+        }
+
+        .header-text h1 {
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin: 0;
+            color: white;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
+        }
+
+        .header-nav-links {
+            display: flex;
+            align-items: center;
+            gap: 15px; 
+            border-right: 2px solid rgba(255, 255, 255, 0.3);
+            padding-right: 20px; 
+        }
+
+        .header-nav-links a {
+            color: white;
+            text-decoration: none;
+            font-size: 0.9rem;
+            font-weight: 500;
+            opacity: 0.85;
+            transition: all 0.2s ease;
+        }
+
+        .header-nav-links a:hover {
+            opacity: 1;
+        }
+
+        .header-logo:hover .header-icon {
+            background: rgba(255, 255, 255, 0.25);
+            transform: rotate(360deg);
+        }
+
+        .header-left-section {
+            display: flex;
+            align-items: center;
+        }
+
+        .header-left-section a.btn-outline-light {
+            border-radius: 20px;
+            font-weight: 500;
+            border-width: 2px;
+            transition: all 0.2s ease;
+            color: white;
+            border-color: white;
+        }
+
+        .header-left-section a.btn-outline-light:hover {
+            background-color: white;
+            color: #198754;
+        }
+
+
+    </style>
+
+</head>
+<body>
+    <header class="main-header">
+        <div class="header-right-section">
+        <div class="header-logo">
+            <div class="header-icon">
+                <i class="fa-solid fa-utensils"></i>
+            </div>
+            <div class="header-text">
+                <h1>YallaEat</h1>
+            </div>
+        </div>
+
+        <nav class="header-nav-links">
+            <a asp-controller="Chat" asp-action="ChatBot">المحادثة</a>
+            <a asp-controller="Customer" asp-action="TrackOrder">تتبع الطلب</a>
+        </nav>
+        </div>
+
+        <div class="header-left-section">
+            <a class="btn btn-outline-light btn-sm"
+               asp-controller="Auth" asp-action="Logout">
+                <i class="fa-solid fa-right-from-bracket me-2"></i>
+                تسجيل خروج
+            </a>
+        </div>
+
+    </header>
+
+    <div class="container">
+        <main role="main" class="pb-3">
+            @RenderBody()
+        </main>
+    </div>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

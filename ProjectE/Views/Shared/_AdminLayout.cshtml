@@ -1,0 +1,59 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>@ViewData["Title"] - ProjectE</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" />
+</head>
+<body>
+    <header>
+        <nav class="navbar navbar-expand-sm navbar-light bg-light border-bottom box-shadow mb-3">
+            <div class="container">
+                @* Hide ProjectE brand on specific pages *@
+                @if (!((ViewContext.RouteData.Values["controller"]?.ToString() == "Auth" &&
+                                (ViewContext.RouteData.Values["action"]?.ToString() == "Login" ||
+                                ViewContext.RouteData.Values["action"]?.ToString() == "Register"))
+                                || (ViewContext.RouteData.Values["controller"]?.ToString() == "Menu" &&
+                                ViewContext.RouteData.Values["action"]?.ToString() == "ViewMenu")
+                                || (ViewContext.RouteData.Values["controller"]?.ToString() == "AdminDashboard" &&
+                                ViewContext.RouteData.Values["action"]?.ToString() == "Index")))
+                {
+                    <a class="navbar-brand" asp-controller="Home" asp-action="Index">ProjectE</a>
+                }
+
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse"
+                        aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+
+                <div class="collapse navbar-collapse">
+                    <ul class="navbar-nav">
+                        @* Hide Orders & Menu only on Login/Register pages *@
+                        @if (!(ViewContext.RouteData.Values["controller"]?.ToString() == "Auth"
+                                                && (ViewContext.RouteData.Values["action"]?.ToString() == "Login"
+                                                || ViewContext.RouteData.Values["action"]?.ToString() == "Register")))
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link" asp-controller="AdminDashboard" asp-action="Index">Orders</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" asp-controller="Menu" asp-action="ViewMenu">Menu</a>
+                            </li>
+                        }
+                    </ul>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <div class="container">
+        <main role="main" class="pb-3">
+            @RenderBody()
+        </main>
+    </div>
+
+
+    @RenderSection("Scripts", required: false)
+</body>
+</html>

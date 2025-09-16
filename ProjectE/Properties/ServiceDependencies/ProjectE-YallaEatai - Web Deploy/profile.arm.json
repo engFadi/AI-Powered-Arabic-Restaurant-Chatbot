@@ -1,0 +1,158 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2018-05-01/subscriptionDeploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "metadata": {
+    "_dependencyType": "compute.appService.windows"
+  },
+  "parameters": {
+    "resourceGroupName": {
+      "type": "string",
+      "defaultValue": "T-Project-E",
+      "metadata": {
+        "description": "Name of the resource group for the resource. It is recommended to put resources under same resource group for better tracking."
+      }
+    },
+    "resourceGroupLocation": {
+      "type": "string",
+      "defaultValue": "eastus",
+      "metadata": {
+        "description": "Location of the resource group."
+      }
+    },
+    "resourceName": {
+      "type": "string",
+      "defaultValue": "ProjectE-YallaEatai",
+      "metadata": {
+        "description": "Name of the main resource to be created by this template."
+      }
+    },
+    "resourceLocation": {
+      "type": "string",
+      "defaultValue": "[parameters('resourceGroupLocation')]",
+      "metadata": {
+        "description": "Location of the resource."
+      }
+    },
+    "sqlAdminPassword": {
+      "type": "securestring",
+      "metadata": {
+        "description": "Administrator password for SQL Server."
+      }
+    }
+  },
+  "variables": {
+    "appServicePlan_name": "[concat('Plan', uniqueString(concat(parameters('resourceName'), subscription().subscriptionId)))]",
+    "appServicePlan_ResourceId": "[concat('/subscriptions/', subscription().subscriptionId, '/resourceGroups/', parameters('resourceGroupName'), '/providers/Microsoft.Web/serverFarms/', variables('appServicePlan_name'))]",
+    "sqlServerName": "[concat(parameters('resourceName'), '-sqlserver')]",
+    "sqlDatabaseName": "[concat(parameters('resourceName'), '-sqldb')]"
+  },
+  "resources": [
+    {
+      "type": "Microsoft.Resources/resourceGroups",
+      "name": "[parameters('resourceGroupName')]",
+      "location": "[parameters('resourceGroupLocation')]",
+      "apiVersion": "2019-10-01"
+    },
+    {
+      "type": "Microsoft.Resources/deployments",
+      "name": "[concat(parameters('resourceGroupName'), 'Deployment', uniqueString(concat(parameters('resourceName'), subscription().subscriptionId)))]",
+      "resourceGroup": "[parameters('resourceGroupName')]",
+      "apiVersion": "2019-10-01",
+      "dependsOn": [
+        "[parameters('resourceGroupName')]"
+      ],
+      "properties": {
+        "mode": "Incremental",
+        "template": {
+          "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+          "contentVersion": "1.0.0.0",
+          "parameters": {},
+          "variables": {},
+          "resources": [
+            {
+              "type": "Microsoft.Web/serverFarms",
+              "apiVersion": "2022-03-01",
+              "name": "[variables('appServicePlan_name')]",
+              "location": "[parameters('resourceLocation')]",
+              "sku": {
+                "name": "S1",
+                "tier": "Standard",
+                "size": "S1",
+                "family": "S"
+              },
+              "properties": {}
+            },
+            {
+              "type": "Microsoft.Web/sites",
+              "apiVersion": "2022-03-01",
+              "name": "[parameters('resourceName')]",
+              "location": "[parameters('resourceLocation')]",
+              "kind": "app",
+              "dependsOn": [
+                "[variables('appServicePlan_name')]"
+              ],
+              "identity": {
+                "type": "SystemAssigned"
+              },
+              "properties": {
+                "serverFarmId": "[resourceId('Microsoft.Web/serverFarms', variables('appServicePlan_name'))]",
+                "httpsOnly": true,
+                "siteConfig": {
+                  "metadata": [
+                    {
+                      "name": "CURRENT_STACK",
+                      "value": "dotnet"
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "type": "Microsoft.Sql/servers",
+              "apiVersion": "2022-02-01-preview",
+              "name": "[variables('sqlServerName')]",
+              "location": "[parameters('resourceLocation')]",
+              "properties": {
+                "administratorLogin": "sqladminuser",
+                "administratorLoginPassword": "[parameters('sqlAdminPassword')]",
+                "version": "12.0"
+              }
+            },
+            {
+              "type": "Microsoft.Sql/servers/databases",
+              "apiVersion": "2022-02-01-preview",
+              "name": "[concat(variables('sqlServerName'), '/', variables('sqlDatabaseName'))]",
+              "location": "[parameters('resourceLocation')]",
+              "dependsOn": [
+                "[variables('sqlServerName')]"
+              ],
+              "properties": {
+                "collation": "SQL_Latin1_General_CP1_CI_AS",
+                "maxSizeBytes": "2147483648",
+                "sku": {
+                  "name": "S0",
+                  "tier": "Standard"
+                }
+              }
+            },
+            {
+              "type": "Microsoft.Authorization/roleAssignments",
+              "apiVersion": "2022-04-01",
+              "name": "[guid(resourceId('Microsoft.Web/sites', parameters('resourceName')), 'sqlContributor')]",
+              "dependsOn": [
+                "[resourceId('Microsoft.Web/sites', parameters('resourceName'))]",
+                "[resourceId('Microsoft.Sql/servers', variables('sqlServerName'))]"
+              ],
+              "properties": {
+                "roleDefinitionId": "[subscriptionResourceId('Microsoft.Authorization/roleDefinitions', 'b24988ac-6180-42a0-ab88-20f7382dd24c')]",
+                "principalId": "[reference(resourceId('Microsoft.Web/sites', parameters('resourceName')), '2022-03-01', 'Full').identity.principalId]",
+                "principalType": "ServicePrincipal",
+                "scope": "[resourceId('Microsoft.Sql/servers', variables('sqlServerName'))]"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ]
+}

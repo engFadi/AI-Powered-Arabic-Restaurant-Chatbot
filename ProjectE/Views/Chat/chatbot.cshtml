@@ -1,0 +1,454 @@
+﻿@{
+    Layout = "~/Views/Shared/_Layout_Customer.cshtml";
+    ViewData["Title"] = "YallaEat • ChatBot";
+}
+
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>YallaEat • ChatBot</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.rtl.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+    <style>
+        
+        html, body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            background-color: #0d1117;
+        }
+
+
+        #chat-wrapper {
+            position: fixed;
+            top: 50px; 
+            left: 0;
+            width: 100%;
+            height: calc(100% - 50px - 40px);
+            z-index: 1000;
+            display: grid;
+            grid-template-rows: 1fr auto;
+        }
+
+        .chat-container {
+            overflow-y: auto; 
+            padding: 1rem; 
+            display: flex;
+            justify-content: center;
+        }
+
+        #chat {
+            width: 100%;
+            max-width: 900px; 
+        }
+
+        .composer-wrap {
+            background-color: #0d1117; /* 161b22  21262d */
+            border-top: 1px solid #0d1117;
+            padding: 0.5rem 1rem; 
+            padding: 1rem;
+            display: flex;
+            justify-content: center;
+        }
+
+        .composer-container {
+            max-width: 900px;
+            width: 100%;
+        }
+
+        .input-group {
+            border-radius: 25px;
+            overflow: hidden;
+            box-shadow: 0 2px 10px rgba(25, 135, 84, 0.15);
+            align-items: stretch;
+            display: flex;
+            direction: ltr;
+            background-color: #198754;
+        }
+
+        .input-group .form-control {
+            border: none;
+            border-radius: 25px 0 0 25px;
+            padding: 0.75rem 1rem;
+            resize: none;
+            background-color: #21262d;
+            color: #f0f6fc;
+            max-height: 120px;
+            overflow-y: auto;
+            direction: rtl; 
+            text-align: right;
+            border: 1px solid #30363d;
+            overflow-y: hidden;
+        }
+
+        .input-group .form-control.scrollable {
+            overflow-y: auto;
+        }
+
+        .input-group .form-control::placeholder {
+            color: #8b949e; 
+        }
+
+        .input-group .form-control:focus {
+            background-color: #21262d;
+            color: #f0f6fc;
+            border-color: #198754; 
+            box-shadow: 0 0 0 3px rgba(25, 135, 84, 0.25);
+            outline: none;
+        }
+
+        .input-group .btn {
+            border: none;
+            border-radius: 0 25px 25px 0;
+            padding: 0.75rem 1rem;
+            min-width: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: #198754; 
+            transition: all 0.2s ease;
+            border-left: none;
+            align-self: stretch;
+        }
+
+        .input-group .btn:hover {
+            background-color: #157347; 
+            transform: scale(1.05);
+        }
+
+        .input-group .btn svg {
+            fill: white;
+        }
+
+        .input-group .btn .material-icons {
+            font-size: 20px;
+        }
+
+        .avatar {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #198754, #20c997);
+            font-size: 18px;
+            flex-shrink: 0;
+            color: white;
+        }
+
+        .msg-bubble {
+           
+            word-wrap: break-word;
+            word-break: break-word;
+            color: #f0f6fc;
+            white-space: pre-wrap;
+        }
+
+        .message-container {
+            max-width: 70%;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .message-container.user {
+            align-items: flex-end;
+        }
+
+        .message-container.bot {
+            align-items: flex-start;
+        }
+
+        .msg-bubble.bot {
+            background-color: #21262d !important;
+            border: 1px solid #30363d !important;
+            color: #f0f6fc !important;
+        }
+
+        .msg-bubble.user {
+            background: linear-gradient(135deg, #198754, #20c997) !important; /* Green gradient */
+            border: none !important;
+            color: white !important;
+        }
+
+        .typing-bubble {
+            background-color: #21262d;
+            border: 1px solid #30363d;
+            color: #8b949e;
+        }
+
+        .spinner-grow {
+            color: #198754;
+        }
+
+        #err {
+            color: #f85149 !important; 
+        }
+
+        .time-stamp {
+            color: #6e7681 !important; 
+            font-size: 0.75rem;
+            margin-top: 0.25rem;
+            opacity: 0.8;
+        }
+
+        .chat-container::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .chat-container::-webkit-scrollbar-track {
+            background: #161b22;
+        }
+
+        .chat-container::-webkit-scrollbar-thumb {
+            background: #30363d;
+            border-radius: 3px;
+        }
+
+        .chat-container::-webkit-scrollbar-thumb:hover {
+            background: #484f58;
+        }
+
+    </style>
+</head>
+<body class="text-light">
+
+    <div id="chat-wrapper">
+        <!-- Chat -->
+        <div id="chat-container" class="chat-container">
+            <ul id="chat" class="list-unstyled">
+            </ul>
+        </div>
+
+        <!-- Composer -->
+        <div class="composer-wrap">
+            <div class="composer-container">
+                <div class="input-group">
+                    <textarea id="prompt" class="form-control" rows="1"
+                              placeholder="اكتب رسالتك هنا… "></textarea>
+                    <button id="sendBtn" class="btn">
+                        <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 0 24 24" width="24px">
+                            <path d="M0 0h24v24H0V0z" fill="none" />
+                            <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z" />
+                        </svg>
+                    </button>
+                </div>
+                <div id="err" class="small mt-1"></div>
+            </div>
+        </div>
+    </div>
+
+    <template id="message-template">
+        <li class="d-flex gap-2 mb-3">
+            <div class="avatar"></div>
+            <div class="message-container">
+                <div class="msg-bubble rounded-3 p-3 shadow-sm"></div>
+                <div class="time-stamp"></div>
+            </div>
+        </li>
+    </template>
+
+    <template id="typing-template">
+        <li id="typing" class="d-flex gap-2 mb-3">
+            <div class="avatar"><i class="fa-solid fa-robot"></i></div>
+            <div class="message-container bot">
+                <div class="msg-bubble typing-bubble rounded-3 p-3 shadow-sm"><span class="spinner-grow spinner-grow-sm me-1"></span> يكتب...</div>
+            </div>
+        </li>
+    </template>
+
+    <script>
+        const chatContainer = document.getElementById('chat-container');
+        const chatList = document.getElementById('chat');
+        const promptEl = document.getElementById('prompt');
+        const sendBtn = document.getElementById('sendBtn');
+        const errEl = document.getElementById('err');
+
+        const messageTemplate = document.getElementById('message-template');
+        const typingTemplate = document.getElementById('typing-template');
+
+        function scrollChatToBottom() {
+            setTimeout(() => {
+                chatContainer.scrollTop = chatContainer.scrollHeight;
+            }, 0);
+        }
+
+        let conversationId = sessionStorage.getItem('conversationId');
+        if (!conversationId) {
+          conversationId = (crypto.randomUUID && crypto.randomUUID())
+            || (Date.now().toString(36) + Math.random().toString(36).slice(2));
+          sessionStorage.setItem('conversationId', conversationId);
+        }
+
+        function nowTime() {
+            return new Date().toLocaleTimeString('ar', { hour: '2-digit', minute: '2-digit' });
+        }
+
+        function addMsg({ who, text }) {
+            const isUser = who === 'user';
+            const messageClone = messageTemplate.content.cloneNode(true);
+
+            const li = messageClone.querySelector('li');
+            const avatar = messageClone.querySelector('.avatar');
+            const messageContainer = messageClone.querySelector('.message-container');
+            const msgBubble = messageClone.querySelector('.msg-bubble');
+            const timeStamp = messageClone.querySelector('.time-stamp');
+
+            li.classList.toggle('flex-row-reverse', isUser);
+            li.classList.toggle('text-end', isUser);
+
+            avatar.innerHTML = isUser ? '<i class="fa-solid fa-user"></i>' : '<i class="fa-solid fa-robot"></i>';
+
+            messageContainer.classList.add(isUser ? 'user' : 'bot');
+            msgBubble.classList.add(isUser ? 'user' : 'bot');
+            msgBubble.innerHTML = isUser ? escapeHtml(text) : text;
+
+            timeStamp.textContent = nowTime();
+
+            chatList.appendChild(messageClone);
+            scrollChatToBottom();
+        }
+
+        function showTyping() {
+            if (document.getElementById('typing')) return;
+            const typingClone = typingTemplate.content.cloneNode(true);
+            chatList.appendChild(typingClone);
+            scrollChatToBottom();
+        }
+
+        function hideTyping() {
+            const t = document.getElementById('typing');
+            if (t) t.remove();
+        }
+
+        function escapeHtml(str) {
+            return str.replace(/[&<>"']/g, s => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[s]));
+        }
+
+        async function send() {
+            errEl.textContent = '';
+            const text = promptEl.value.trim();
+            if (!text) {
+                errEl.textContent = 'يرجى كتابة رسالتك أولاً.';
+                return;
+            }
+
+            promptEl.value = '';
+            promptEl.style.height = 'auto';
+
+            addMsg({ who: 'user', text });
+
+            sendBtn.disabled = true;
+            showTyping();
+
+            console.log("Sending userId to backend:", localStorage.getItem("userId"));
+            console.log("Sending conversationId:", conversationId);
+            try {
+                const res = await fetch('/api/chat', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        sender: 0,
+                        userId: localStorage.getItem("userId") || "guest",
+                        conversationId,
+                        messageText: text
+                    })
+                });
+                hideTyping();
+                if (!res.ok) throw new Error(await res.text() || `HTTP ${res.status}`);
+
+                const arr = await res.json();
+
+                if (Array.isArray(arr) && arr[0]?.conversationId) {
+                    conversationId = arr[0].conversationId;
+                    sessionStorage.setItem('conversationId', conversationId);
+                }
+
+                const bot = Array.isArray(arr) ? arr.find(m => m.sender === 1) : null;
+                addMsg({ who: 'bot', text: bot?.messageText || 'لم يتم استلام رد.' });
+
+            } catch (e) {
+                hideTyping();
+                errEl.textContent = e.message;
+                addMsg({ who: 'bot', text: 'حدث خطأ غير متوقع. حاول لاحقاً.' });
+            } finally {
+                sendBtn.disabled = false;
+                promptEl.focus();
+            }
+
+        }
+
+        promptEl.addEventListener('input', () => {
+            promptEl.style.height = 'auto';
+            const newHeight = Math.min(promptEl.scrollHeight, 120);
+            promptEl.style.height = `${newHeight}px`;
+
+            if (promptEl.scrollHeight > 120) {
+                promptEl.classList.add('scrollable');
+            } else {
+                promptEl.classList.remove('scrollable');
+            }
+        });
+
+        sendBtn.addEventListener('click', send);
+        promptEl.addEventListener('keydown', e => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                send();
+            }
+        });
+
+             // Call when user starts chatting (add this after conversationId generation)
+            window.addEventListener('load', async () => {
+                const welcomeMessage = "مرحباً! أنا مساعد <b>YallaEat</b> 😊 \nكيف أقدر أساعدك اليوم؟ (قائمة الطعام، الأسعار، التوصيل، الحجوزات…)";
+                addMsg({ who: 'bot', text: welcomeMessage });
+
+                // ✅ Initialize chat session
+                try {
+                    const userId = localStorage.getItem("userId");
+                    if (userId && conversationId) {
+                        await fetch('/api/chat/start-session', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                conversationId: conversationId,
+                                userId: userId
+                            })
+                        });
+                        console.log("Chat session initialized");
+                    }
+                } catch (error) {
+                    console.log("Failed to initialize chat session:", error);
+                }
+
+                scrollChatToBottom();
+            });
+
+        
+
+        
+
+        // Call when user is leaving (add this before the closing script tag)
+    window.addEventListener('beforeunload', async () => {
+    const userId = localStorage.getItem("userId");
+    if (userId && conversationId) {
+        try {
+            // Use sendBeacon for reliability during page unload
+            navigator.sendBeacon('/api/chat/end-session', JSON.stringify({
+            conversationId: conversationId,
+            userId: userId
+        }));
+    } catch (error) {
+        console.log("Failed to finalize chat session:", error);
+        }
+    }
+    });
+
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

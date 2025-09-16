@@ -1,0 +1,128 @@
+﻿@{
+    ViewData["Title"] = "Welcome - YallaEat.AI";
+}
+@{
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"]</title>
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&family=Playfair+Display:ital,wght@1,700&display=swap" rel="stylesheet">
+
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Poppins', sans-serif;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: url('https://images.unsplash.com/photo-1551183053-bf91a1d81141?auto=format&fit=crop&w=1920&q=80');
+        }
+
+        .overlay {
+            position: absolute;
+            inset: 0;
+            background: rgba(1, 50, 32, 0.62);
+            z-index: 0;
+        }
+
+        .navbar {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            background: rgba(1, 50, 32, 0.85);
+            padding: 15px 30px;
+            display: flex;
+            gap: 20px;
+            z-index: 2;
+        }
+
+            .navbar a {
+                color: #fff;
+                font-size: 1.05rem;
+                font-weight: 500;
+                text-decoration: none;
+                transition: color .25s ease;
+            }
+
+                .navbar a:hover {
+                    color: #ffcc00;
+                }
+
+        .welcome-text {
+            position: relative;
+            z-index: 1;
+            text-align: center;
+            color: #fff;
+            padding: 20px;
+            text-shadow: 2px 2px 6px rgba(0,0,0,.65);
+        }
+
+            .welcome-text h1 {
+                margin: 0;
+                font-size: 3.5rem;
+                font-family: 'Playfair Display', serif;
+                font-style: italic;
+                background: linear-gradient(90deg, #ffcc00, #fff4b3, #ffcc00);
+                background-size: 200% auto;
+                -webkit-background-clip: text;
+                -webkit-text-fill-color: transparent;
+                animation: shine 3s linear infinite;
+            }
+
+            .welcome-text p {
+                margin-top: 10px;
+                font-size: 1.2rem;
+                color: #e8f5e9;
+            }
+
+        @@keyframes shine {
+            to {
+                background-position: 200% center;
+            }
+        }
+
+        @@media (max-width: 480px) {
+            .welcome-text h1 {
+                font-size: 2.3rem;
+            }
+
+            .welcome-text p {
+                font-size: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="overlay"></div>
+
+    <div class="navbar">
+        <a asp-controller="Menu" asp-action="ViewMenu">Menu</a>
+        <a asp-controller="AdminDashboard" asp-action="Index">Order</a>
+    </div>
+
+    <div class="welcome-text">
+        <h1>YallaEat.AI</h1>
+        <p>سلطات • وجبات رئيسية • مقبلات  • حلويات  • مشروبات • </p>
+    </div>
+
+    <!-- ✅ Script للتحقق من التوكن -->
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            const token = localStorage.getItem("token");
+            if (!token) {
+                window.location.href = "/Auth/login";
+            }
+        });
+    </script>
+</body>
+</html>
